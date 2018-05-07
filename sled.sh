@@ -1,9 +1,9 @@
 #!/bin/bash
-VERSIONSTRING="SLED V 1.0.0"
+VERSIONSTRING="SLED V 1.0.1"
 if [ "$1" == "--version" ]; then echo "$VERSIONSTRING" && exit; elif [ "$1" == "--" ]; then shift; fi
-find /tmp/ -maxdepth 1 -name 'sled.'$USER'*' -delete
-tmpfile=$(mktemp "/tmp/sled.$USER.tmp.XXXXXXXXXX") || echo "failed to create tempfile"
-editfile=$(mktemp "/tmp/sled.$USER.edit.XXXXXXXXXX") || echo "failed to create tempfile"
+find /tmp/ -maxdepth 1 -type f -name "sled:$USER:*" \! -exec fuser -s '{}' \; -delete
+tmpfile=$(mktemp "/tmp/sled:$USER:tmp.XXXXXXXXXX") && exec 3<> "$tmpfile" || echo "failed to create tempfile"
+editfile=$(mktemp "/tmp/sled:$USER:edit.XXXXXXXXXX") && exec 4<> "$editfile" || echo "failed to create tempfile"
 if [ "$1" != "" ]; then
     cat -- "$1" >"$tmpfile"
 fi
@@ -52,4 +52,4 @@ while read -r proto; do
         fi
     fi
 done
-find /tmp/ -maxdepth 1 -name 'sled.'$USER'*' -delete
+exec 3>&- && exec 4>&- && find /tmp/ -maxdepth 1 -type f -name "sled:$USER:*" \! -exec fuser -s '{}' \; -delete
