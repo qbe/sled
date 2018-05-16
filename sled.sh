@@ -18,16 +18,16 @@ fi
 #the first non-option argument is read in as a file into the primary buffer
 
 while read -r proto; do
-    command=`echo "$proto" | cut -f 1 -d " "`
-    line=`echo "$proto" | cut -f 1 -d " " --complement`
+    command=$(echo "$proto" | cut -f 1 -d " ")
+    line=$(echo "$proto" | cut -f 1 -d " " --complement)
     #does not use a 'IFS=" " read -r command line' construct to enable indented input
 
     if [ "$command" == "show" ]; then
         cat -n "$tmpfile" | more +"$line"
     elif [ ! -z "${command##*[!0-9]*}" ]; then
-        cat "$tmpfile" | head -n $(expr "$command" - 1) >"$editfile"
+        head -n "$(( "$command" - 1))" < "$tmpfile" >"$editfile"
         echo "$line" >>"$editfile"
-        cat "$tmpfile" | tail -n +"$command" >>"$editfile"
+        tail -n +"$command" < "$tmpfile" >>"$editfile"
         cat "$editfile" >"$tmpfile"
     elif [ "$command" == "write" ]; then
         if [ "$line" != "" ]; then
@@ -47,8 +47,8 @@ while read -r proto; do
         while ! [ "$line" -eq "$line" ]; do
             echo "delete what ? :"
         done
-        cat "$tmpfile" | head -n $(expr "$line" - 1) >"$editfile"
-        cat "$tmpfile" | tail -n +$(expr "$line" + 1) >>"$editfile"
+        head -n "$(("$line" - 1))" < "$tmpfile" >"$editfile"
+        tail -n "+$(("$line" + 1))" < "$tmpfile" >>"$editfile"
         cat "$editfile" >"$tmpfile"
     else
         while [ "$line" == "" ]; do
